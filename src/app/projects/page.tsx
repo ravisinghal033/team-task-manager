@@ -2,7 +2,9 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { RoleBadge } from "@/components/Badges";
 import { Card, CardDescription, CardTitle } from "@/components/Card";
+import { EmptyState } from "@/components/EmptyState";
 
 type ProjectRow = {
   id: string;
@@ -66,14 +68,18 @@ export default function ProjectsPage() {
 
       {projects.length === 0 ? (
         <Card>
-          <CardTitle>No projects yet</CardTitle>
-          <CardDescription>Create your first project to invite teammates and track tasks.</CardDescription>
-          <Link
-            href="/projects/new"
-            className="mt-4 inline-flex items-center justify-center rounded-xl bg-sky-500 px-4 py-2 text-sm font-semibold text-slate-950 transition hover:bg-sky-400"
-          >
-            Create project
-          </Link>
+          <EmptyState
+            title="No projects yet"
+            description="Create your first project to invite teammates and track tasks."
+            action={
+              <Link
+                href="/projects/new"
+                className="inline-flex items-center justify-center rounded-xl bg-sky-500 px-4 py-2 text-sm font-semibold text-slate-950 transition hover:bg-sky-400"
+              >
+                Create project
+              </Link>
+            }
+          />
         </Card>
       ) : (
         <div className="overflow-hidden rounded-2xl border border-slate-800/80 bg-slate-900/40 shadow-card">
@@ -98,7 +104,9 @@ export default function ProjectsPage() {
                     {p.description || "—"}
                   </td>
                   <td className="px-4 py-3 text-slate-300">{p.taskCount}</td>
-                  <td className="px-4 py-3 text-slate-300">{p.myRole}</td>
+                  <td className="px-4 py-3">
+                    {p.myRole ? <RoleBadge role={p.myRole} /> : "—"}
+                  </td>
                 </tr>
               ))}
             </tbody>

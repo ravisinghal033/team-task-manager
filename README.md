@@ -1,210 +1,506 @@
-# Team Task Manager
+# Ethara WorkBoard — Team Task Manager
 
-Production-style internal hiring assignment: **projects**, **per-project roles (ADMIN / MEMBER)**, **tasks**, **JWT in HTTP-only cookies** (no session server), **PostgreSQL + Prisma**, and a **polished Next.js App Router** UI.
+Ethara WorkBoard is a production-style full-stack project management and task tracking application built with Next.js, TypeScript, PostgreSQL, Prisma, JWT authentication, project-level role-based access control, Docker support, and Railway deployment readiness.
 
-## Auth & access helpers
+The application is designed for internal teams that need a simple but secure way to manage projects, assign tasks, track progress, and control user permissions at the project level.
 
-Implemented in `src/lib/auth.ts` and `src/lib/project-access.ts`:
+---
 
-- `getCurrentUser()` / `requireAuth()` — `src/lib/auth.ts` (JWT cookie via `auth-cookie.ts` + `jose` in `jwt.ts`).
-- `getProjectRole(userId, projectId)` — `ADMIN` / `MEMBER` / `null`.
-- `requireProjectMember(userId, projectId)` — membership gate with `{ ok, project, role }` or `not_found` / `forbidden`.
-- `requireProjectAdmin(userId, projectId)` — admin gate on top of membership.
+## Project Highlights
 
-## Features
+- Full-stack Next.js 14 App Router application
+- Secure JWT authentication using HTTP-only cookies
+- PostgreSQL database with Prisma ORM
+- Project-level RBAC with ADMIN and MEMBER roles
+- Task assignment, filtering, overdue tracking, and status updates
+- Optimized dashboard with KPI cards and progress summaries
+- Notifications page and lightweight notification count API
+- Zod validation for strict API request handling
+- Docker support for consistent local setup and easier contribution
+- Railway-ready deployment configuration
+- Clean, responsive, dark-themed UI
 
-- Secure authentication (signup, login, logout, `/api/auth/me`) with **bcrypt** password hashing and **HTTP-only** cookies storing a **JWT**.
-- **Per-project RBAC**: project creator becomes **ADMIN**; admins manage members, roles, project lifecycle, and all tasks; **MEMBER** users view the project and may **only update status** on tasks **assigned to them**.
-- **Projects**: create, list (membership-scoped), detail, edit, delete, invite members by email, duplicate-member protection.
-- **Tasks**: full fields (title, description, status, priority, due date, assignee, audit fields), assignee must be a project member, filters (status, assignee including “me”, priority, overdue), overdue highlighting.
-- **Dashboard** with KPI cards, status breakdown, per-project completion bars, overdue list, and recent tasks.
-- **Zod** on every mutating handler and on task list **query** params (`.strict()` bodies reject unknown keys; invalid JSON → **400**).
-- **RBAC**: last **ADMIN** cannot be removed or demoted; task assignee must be a project member; **MEMBER** PATCH uses `taskMemberStatusPatchRequestSchema` only (`{ status }`).
+---
 
-## Tech stack
+## Core Features
 
-- Next.js 14 (App Router) + TypeScript  
-- Tailwind CSS  
-- PostgreSQL + Prisma ORM  
-- bcrypt + `jose` (HS256 JWT)  
-- Zod validation  
+### Authentication
 
-## Screenshots
+- User signup, login, logout, and session validation
+- Password hashing with bcrypt
+- JWT signed with jose
+- JWT stored in secure HTTP-only cookies
+- Protected API routes and protected application pages
+- `/api/auth/me` endpoint for session-aware UI
 
-_Add screenshots of the dashboard, project board, and task detail here after you run the app locally._
+### Project Management
 
-## Local setup
+- Create, view, update, and delete projects
+- Project creator automatically becomes ADMIN
+- Users only see projects where they are members
+- Admins can invite members by email
+- Duplicate member protection
+- Last-admin protection to prevent a project from losing all admins
 
-1. **Install dependencies**
+### Role-Based Access Control
+
+Each project supports two roles:
+
+#### ADMIN
+
+An ADMIN can:
+
+- Manage project settings
+- Add and remove members
+- Change member roles
+- Create, update, assign, and delete tasks
+- Assign tasks only to existing project members
+- View dashboard and team workload summaries
+
+#### MEMBER
+
+A MEMBER can:
+
+- View projects where they are a member
+- View project tasks
+- Update only the status of tasks assigned to them
+
+A MEMBER cannot:
+
+- Manage project settings
+- Add or remove members
+- Create or delete tasks
+- Edit tasks assigned to another user
+- Update task fields other than status
+
+### Task Management
+
+- Create and manage tasks with title, description, status, priority, due date, and assignee
+- Status workflow for TODO, IN_PROGRESS, and DONE
+- Priority support
+- Due date and overdue task tracking
+- Filters for status, assignee, priority, and overdue tasks
+- Assignee validation to ensure tasks are assigned only to project members
+- Audit-friendly task ownership and assignment rules
+
+### Dashboard and Notifications
+
+- Personalized dashboard greeting
+- KPI cards for projects, total tasks, created tasks, overdue tasks, and team members
+- Per-project progress bars
+- Task status breakdown
+- Due soon and overdue task sections
+- Optimized `/api/dashboard` aggregation
+- Notification bell using lightweight `/api/notifications?countOnly=1`
+- Dedicated `/notifications` page for assigned, due soon, and overdue items
+- Dedicated `/profile` page showing account and project role summary
+
+---
+
+## Performance and UX Improvements
+
+The dashboard and navigation flow were optimized to reduce unnecessary network requests and improve reliability.
+
+Implemented improvements:
+
+- Dashboard data is loaded through a single optimized API call
+- Dashboard API uses batched Prisma queries instead of repeated count/groupBy query storms
+- Dashboard response shape standardized as `{ ok: true, dashboard }`
+- React Strict Mode abort handling fixed using `AbortController` and ignore flags
+- Aborted requests no longer incorrectly show the retry/error UI
+- Repeated `/api/dashboard` calls on route change and tab visibility change were removed
+- Shared user provider reduces repeated `/api/auth/me` calls
+- Notification bell uses count-only API instead of loading full dashboard data
+- Removed Google Font network dependency to avoid local development font fetch abort errors
+- Prisma singleton is used to avoid multiple Prisma clients during development hot reload
+
+---
+
+## Tech Stack
+
+### Frontend
+
+- Next.js 14 App Router
+- React
+- TypeScript
+- Tailwind CSS
+
+### Backend
+
+- Next.js API Routes
+- Prisma ORM
+- PostgreSQL
+- JWT authentication with jose
+- bcrypt password hashing
+- Zod validation
+
+### DevOps
+
+- GitHub for version control
+- Docker / Docker Compose for consistent local setup
+- Railway for deployment
+- Railway PostgreSQL for production database
+
+---
+
+## Docker Support
+
+Docker support is included to make contribution easier and to reduce environment mismatch between developers.
+
+Benefits:
+
+- Consistent setup across different machines
+- Easier onboarding for contributors
+- Local PostgreSQL can be managed with Docker Compose
+- Reduces “works on my machine” issues
+- Helpful foundation for future CI/CD workflows
+
+### Docker Quick Start
+
+Create a `.env` file first, then run:
 
 ```bash
+docker compose up --build
+```
+
+If the project uses a Docker Compose app service named `app`, migrations and seed can be run with:
+
+```bash
+docker compose exec app npx prisma migrate dev
+docker compose exec app npm run prisma:seed
+```
+
+Then open:
+
+```text
+http://localhost:3000
+```
+
+---
+
+## Local Setup
+
+### Prerequisites
+
+- Node.js 18 or higher
+- npm
+- PostgreSQL
+- Git
+
+### 1. Clone the repository
+
+```bash
+git clone <your-github-repository-url>
 cd team-task-manager
+```
+
+### 2. Install dependencies
+
+```bash
 npm install
 ```
 
-2. **Configure environment**
+### 3. Configure environment variables
 
-Copy `.env.example` to `.env` and set:
-
-- `DATABASE_URL` — local or cloud PostgreSQL connection string  
-- `JWT_SECRET` — long random secret (minimum 16 characters)  
-- `NEXT_PUBLIC_APP_URL` — e.g. `http://localhost:3000`  
-
-3. **Create database schema**
+Create a `.env` file from `.env.example`:
 
 ```bash
-npx prisma migrate deploy
+cp .env.example .env
 ```
 
-For iterative local development you can instead use:
+Required environment variables:
+
+```env
+DATABASE_URL=""
+JWT_SECRET=""
+NEXT_PUBLIC_APP_URL="http://localhost:3000"
+```
+
+| Variable | Purpose |
+|---|---|
+| DATABASE_URL | PostgreSQL connection string used by Prisma |
+| JWT_SECRET | Secret key used to sign JWT tokens |
+| NEXT_PUBLIC_APP_URL | Public application URL |
+
+### 4. Generate Prisma client
+
+```bash
+npx prisma generate
+```
+
+### 5. Apply database migrations
+
+For local development:
 
 ```bash
 npx prisma migrate dev
 ```
 
-4. **Seed demo data**
+For production-like environments:
+
+```bash
+npx prisma migrate deploy
+```
+
+### 6. Seed demo data
 
 ```bash
 npm run prisma:seed
 ```
 
-(Equivalent: `npx prisma db seed`.)
-
-5. **Start the dev server**
+### 7. Start the development server
 
 ```bash
 npm run dev
 ```
 
-Open `http://localhost:3000` — you will be redirected to `/login` or `/dashboard` based on your session.
+Open:
 
-## Environment variables
-
-| Variable | Purpose |
-|----------|---------|
-| `DATABASE_URL` | PostgreSQL URL for Prisma |
-| `JWT_SECRET` | Signing key for session JWT (≥ 16 chars) |
-| `NEXT_PUBLIC_APP_URL` | Public site URL (used in docs / absolute links if you extend the app) |
-
-## Prisma commands
-
-```bash
-npx prisma migrate dev       # create/apply migrations in development
-npx prisma migrate deploy    # apply migrations in production / Railway build
-npx prisma db seed           # populate demo users + sample project/tasks
-npx prisma studio            # browse data
+```text
+http://localhost:3000
 ```
 
-## Railway deployment
+---
 
-1. Push this repository to **GitHub**.  
-2. In [Railway](https://railway.app), **New Project → Deploy from GitHub** and select the repo.  
-3. Add a **PostgreSQL** plugin/service; Railway injects `DATABASE_URL` into the app service.  
-4. In the **app service variables**, set:  
-   - `DATABASE_URL` (reference from the Postgres service if not auto-linked)  
-   - `JWT_SECRET` (generate a strong random string)  
-   - `NEXT_PUBLIC_APP_URL` (your Railway public URL, e.g. `https://your-app.up.railway.app`)  
-5. **Build**: the default `npm run build` runs `prisma generate`, `prisma migrate deploy`, and `next build`, so migrations apply when `DATABASE_URL` is available at build time.  
-6. **Release / start**: `npm run start` (Railway default).  
-7. Under **Networking**, **Generate Domain** (or attach a custom domain).  
-8. After first deploy, run a **one-off** seed if you want demo data:  
-   `npm run prisma:seed` (Railway shell / `railway run npm run prisma:seed`).
+## Demo Credentials
 
-Ensure the Node service has network access to Postgres and that all three env vars are set before the first successful build.
-
-## Demo credentials
-
-After `npm run prisma:seed`:
+After running the seed command, the demo users can be used for testing:
 
 | Role | Email | Password |
-|------|--------|----------|
-| Admin (project owner / ADMIN) | `admin@example.com` | `Admin@12345` |
-| Member | `member@example.com` | `Member@12345` |
+|---|---|---|
+| Admin | bharat.patidar@ethara.ai | Bharat@12345 |
+| Member | ravi.singhal033@ethara.ai | Ravi@12345 |
 
-The seed creates a shared **“Product Launch”** project, membership for both users, and sample tasks (including an **overdue** item).
+The seeded data includes demo projects, project memberships, and sample tasks to test dashboard, RBAC, task assignment, and notification workflows.
 
-## API endpoints
+---
 
-**Auth**
+## API Overview
 
-- `POST /api/auth/signup` — body: `{ name, email, password }`  
-- `POST /api/auth/login` — body: `{ email, password }`  
-- `POST /api/auth/logout`  
-- `GET /api/auth/me`  
+### Auth
 
-**Dashboard**
+| Method | Endpoint | Description |
+|---|---|---|
+| POST | `/api/auth/signup` | Create a new user |
+| POST | `/api/auth/login` | Login and set auth cookie |
+| POST | `/api/auth/logout` | Logout and clear auth cookie |
+| GET | `/api/auth/me` | Get current authenticated user |
 
-- `GET /api/dashboard`  
+### Dashboard
 
-**Projects**
+| Method | Endpoint | Description |
+|---|---|---|
+| GET | `/api/dashboard` | Get dashboard analytics and summaries |
 
-- `GET /api/projects`  
-- `POST /api/projects` — body: `{ name, description? }`  
-- `GET /api/projects/:projectId`  
-- `PATCH /api/projects/:projectId` — admin only  
-- `DELETE /api/projects/:projectId` — admin only  
+### Notifications
 
-**Members**
+| Method | Endpoint | Description |
+|---|---|---|
+| GET | `/api/notifications?countOnly=1` | Get lightweight notification count |
+| GET | `/api/notifications` | Get full notification lists |
 
-- `GET /api/projects/:projectId/members`  
-- `POST /api/projects/:projectId/members` — admin; body `{ email }`  
-- `PATCH /api/projects/:projectId/members/:memberId` — admin; body `{ role }`  
-- `DELETE /api/projects/:projectId/members/:memberId` — admin  
+### Projects
 
-**Tasks**
+| Method | Endpoint | Description |
+|---|---|---|
+| GET | `/api/projects` | List user projects |
+| POST | `/api/projects` | Create project |
+| GET | `/api/projects/:projectId` | Get project details |
+| PATCH | `/api/projects/:projectId` | Update project, admin only |
+| DELETE | `/api/projects/:projectId` | Delete project, admin only |
 
-- `GET /api/projects/:projectId/tasks` — query: `status`, `assigneeId` (`me` allowed), `priority`, `overdue=true`  
-- `POST /api/projects/:projectId/tasks` — admin only  
-- `GET /api/tasks/:taskId`  
-- `PATCH /api/tasks/:taskId` — admin (full update) or assignee (status only)  
-- `DELETE /api/tasks/:taskId` — admin only  
+### Members
 
-## Role-based access (summary)
+| Method | Endpoint | Description |
+|---|---|---|
+| GET | `/api/projects/:projectId/members` | List project members |
+| POST | `/api/projects/:projectId/members` | Add member by email, admin only |
+| PATCH | `/api/projects/:projectId/members/:memberId` | Update member role, admin only |
+| DELETE | `/api/projects/:projectId/members/:memberId` | Remove member, admin only |
 
-- **ADMIN** (per project): update/delete project, add/remove members, change roles, full CRUD on tasks, assign tasks to any **existing** project member.  
-- **MEMBER**: read project and tasks; **cannot** manage members or delete the project; **cannot** edit someone else’s task; may **PATCH only `status`** on tasks where they are the **assignee**. Unassigned tasks cannot be status-updated by a member.
+### Tasks
 
-## Demo video flow (suggested)
+| Method | Endpoint | Description |
+|---|---|---|
+| GET | `/api/projects/:projectId/tasks` | List project tasks with filters |
+| POST | `/api/projects/:projectId/tasks` | Create task, admin only |
+| GET | `/api/tasks/:taskId` | Get task details |
+| PATCH | `/api/tasks/:taskId` | Update task based on role rules |
+| DELETE | `/api/tasks/:taskId` | Delete task, admin only |
 
-1. Log in as **admin** — show dashboard stats.  
-2. Open **Product Launch** — filters, overdue badge, new task.  
-3. **Settings** — rename project, invite a user, change a role.  
-4. Log in as **member** — same project read-only settings; open an assigned task and change **status** only.  
-5. Attempt a forbidden action (e.g., member opens settings URL) — show **403** / UI message.  
-6. Log out and log back in — session cookie behavior.
+---
 
-## NPM scripts
+## Railway Deployment
 
-| Script | Command |
-|--------|---------|
-| `dev` | `next dev` |
-| `build` | `prisma generate && prisma migrate deploy && next build` |
-| `start` | `next start` |
-| `lint` | `next lint` |
-| `postinstall` | `prisma generate` (Railway install) |
-| `prisma:generate` | `prisma generate` |
-| `prisma:migrate` | `prisma migrate deploy` |
-| `prisma:seed` | `prisma db seed` |
+### 1. Push code to GitHub
 
-## Testing checklist (manual)
+```bash
+git add .
+git commit -m "Prepare production deployment"
+git push origin main
+```
 
-- [ ] **Auth**: signup validation (short password, bad email); login wrong password → **401**; `/api/auth/me` without cookie → **401**; logout clears access to `/dashboard`.
-- [ ] **Middleware**: hit `/dashboard`, `/projects`, `/projects/x`, `/tasks/x` logged out → redirect to `/login`.
-- [ ] **Projects**: non-member `GET /api/projects/:id` → **403**; missing id → **404**.
-- [ ] **Admin**: member cannot `PATCH` project, `POST` task, `DELETE` task, or manage members → **403**.
-- [ ] **Member task**: assignee `PATCH` with `{ "status": "DONE" }` succeeds; same user with `{ "status": "DONE", "title": "x" }` → **400** (strict schema); non-assignee member → **403**; unassigned task + member → **403**.
-- [ ] **Last admin**: sole admin cannot be demoted to MEMBER or deleted as member → **400**.
-- [ ] **Assignee**: `POST/PATCH` task with non-member `assigneeId` → **400**.
-- [ ] **Task list query**: invalid `?status=FOO` → **400**.
+### 2. Create Railway project
 
-## Features completed (hardening pass)
+- Open Railway
+- Create a new project
+- Select Deploy from GitHub repo
+- Choose this repository
 
-- JWT-only auth (`jose` + HTTP-only cookie); no `next-auth` / server session store.
-- Central `parseJsonBody()` + strict Zod request schemas (`src/lib/validation.ts`, `src/lib/request-json.ts`).
-- Page `middleware.ts` guards `/dashboard`, `/projects`, `/projects/*`, `/tasks`, `/tasks/*`.
-- Prisma uniques, cascades on project delete, documented schema; APIs never return `passwordHash`.
-- `requireAuth()` on protected APIs; project routes use `requireProjectMember` / `requireProjectAdmin` as appropriate; consistent **401 / 403 / 404**.
+### 3. Add PostgreSQL
 
-## License
+- Add a Railway PostgreSQL service
+- Copy or reference the PostgreSQL `DATABASE_URL`
 
-Private / assessment use unless you choose otherwise.
+### 4. Add environment variables
+
+Set these variables in the Railway app service:
+
+```env
+DATABASE_URL=""
+JWT_SECRET=""
+NEXT_PUBLIC_APP_URL=""
+```
+
+### 5. Configure Railway commands
+
+| Railway Setting | Value |
+|---|---|
+| Build Command | `npm run build` |
+| Pre-deploy Command | `npm run prisma:migrate` |
+| Start Command | `npm run start` |
+
+### 6. Generate public URL
+
+In Railway Networking settings:
+
+- Generate a public domain
+- Copy the live URL
+- Set `NEXT_PUBLIC_APP_URL` to that live URL
+
+### 7. Seed production demo data, optional
+
+Run this only if demo data is required in the deployed app:
+
+```bash
+npm run prisma:seed
+```
+
+---
+
+## NPM Scripts
+
+| Script | Description |
+|---|---|
+| `npm run dev` | Start local development server |
+| `npm run build` | Generate Prisma client and build Next.js app |
+| `npm run start` | Start production server |
+| `npm run lint` | Run ESLint |
+| `npm run typecheck` | Run TypeScript type checking |
+| `npm run prisma:generate` | Generate Prisma client |
+| `npm run prisma:migrate` | Apply production migrations |
+| `npm run prisma:seed` | Seed demo data |
+
+---
+
+## Manual Testing Checklist
+
+### Authentication
+
+- Signup validates email and password
+- Login with wrong password returns 401
+- Logout clears the session
+- `/api/auth/me` returns 401 without cookie
+- Protected pages redirect logged-out users to login
+
+### Projects and Members
+
+- Users see only projects where they are members
+- Admin can update and delete projects
+- Admin can invite members by email
+- Duplicate member invite is blocked
+- Last admin cannot be removed
+- Last admin cannot be demoted
+
+### Tasks
+
+- Admin can create, update, assign, and delete tasks
+- Task assignee must be a project member
+- Member can update only assigned task status
+- Member cannot update title, description, priority, assignee, or due date
+- Non-assignee member cannot update another user’s task
+- Invalid task filters return validation errors
+
+### Dashboard and Notifications
+
+- Dashboard loads KPI cards successfully
+- Dashboard does not show retry UI when API returns 200
+- Route navigation does not repeatedly refetch dashboard data
+- Notification badge uses count-only API
+- Notifications page shows assigned, due soon, and overdue items
+
+---
+
+## Security Notes
+
+- `.env` must never be committed to GitHub
+- Use a strong `JWT_SECRET`
+- Rotate database credentials if they are accidentally exposed
+- Keep local and production database credentials separate
+- Do not expose `passwordHash` in API responses
+- Use HTTP-only cookies for authentication
+- Validate request bodies and query parameters with Zod
+
+---
+
+## Folder Structure
+
+```text
+src/
+  app/
+    api/
+    dashboard/
+    notifications/
+    profile/
+    projects/
+    tasks/
+  components/
+  lib/
+prisma/
+  schema.prisma
+  seed.ts
+public/
+```
+
+Important files:
+
+| File | Purpose |
+|---|---|
+| `src/lib/auth.ts` | Authentication helpers |
+| `src/lib/jwt.ts` | JWT signing and verification |
+| `src/lib/auth-cookie.ts` | Cookie helpers |
+| `src/lib/project-access.ts` | Project role and membership checks |
+| `src/lib/prisma.ts` | Prisma singleton |
+| `src/lib/dashboard-aggregate.ts` | Optimized dashboard aggregation |
+| `src/lib/validation.ts` | Zod schemas |
+| `src/middleware.ts` | Protected route middleware |
+| `prisma/schema.prisma` | Database schema |
+| `prisma/seed.ts` | Demo data seed |
+
+---
+
+## Submission Notes
+
+This project demonstrates:
+
+- Production-style full-stack development
+- Secure authentication and authorization
+- Project-level role-based access control
+- PostgreSQL schema design with Prisma
+- API validation and clean error handling
+- Performance optimization for dashboard data
+- Docker-ready contribution workflow
+- Railway deployment readiness
+- Clean and user-friendly interface
+
+The application is ready for GitHub submission and Railway deployment after environment variables are configured correctly.

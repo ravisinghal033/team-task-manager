@@ -1,19 +1,38 @@
 "use client";
 
-import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Button, Input } from "@/components/FormControls";
+import { useEffect, useState } from "react";
+import { AuthLayout } from "@/components/AuthLayout";
 import { Card, CardDescription, CardTitle } from "@/components/Card";
+import { Button, Input, SelectField } from "@/components/FormControls";
+import { apiFetch } from "@/lib/client-fetch";
 
 export default function SignupPage() {
   const router = useRouter();
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [workspaceIntent, setWorkspaceIntent] = useState("admin");
   const [error, setError] = useState<string | null>(null);
   const [fieldErrors, setFieldErrors] = useState<Record<string, string[]> | null>(null);
   const [loading, setLoading] = useState(false);
+  const [checkingAuth, setCheckingAuth] = useState(true);
+
+  useEffect(() => {
+    let cancelled = false;
+    void (async () => {
+      try {
+        const res = await apiFetch("/api/auth/me");
+        if (!cancelled && res.ok) router.replace("/dashboard");
+      } finally {
+        if (!cancelled) setCheckingAuth(false);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [router]);
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -21,10 +40,9 @@ export default function SignupPage() {
     setFieldErrors(null);
     setLoading(true);
     try {
-      const res = await fetch("/api/auth/signup", {
+      const res = await apiFetch("/api/auth/signup", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        credentials: "include",
         body: JSON.stringify({ name, email, password }),
       });
       const data = (await res.json()) as {
@@ -34,11 +52,9 @@ export default function SignupPage() {
       if (!res.ok) {
         setError(data.error || "Signup failed");
         setFieldErrors(data.details ?? null);
-        setLoading(false);
         return;
       }
       router.push("/dashboard");
-      router.refresh();
     } catch {
       setError("Something went wrong");
     } finally {
@@ -46,11 +62,25 @@ export default function SignupPage() {
     }
   }
 
+  if (checkingAuth) {
+    return (
+      <AuthLayout>
+        <Card>
+          <CardTitle>Checking session…</CardTitle>
+          <CardDescription>Please wait.</CardDescription>
+        </Card>
+      </AuthLayout>
+    );
+  }
+
   return (
-    <div className="mx-auto flex min-h-[70vh] max-w-md flex-col justify-center">
+    <AuthLayout>
       <Card>
         <CardTitle>Create your account</CardTitle>
-        <CardDescription>Start collaborating on projects in seconds.</CardDescription>
+        <CardDescription>
+          Use a unique email and a password of at least 8 characters. You are signed in
+          automatically after signup.
+        </CardDescription>
         <form onSubmit={(e) => void onSubmit(e)} className="mt-6 space-y-4">
           <Input
             label="Name"
@@ -78,9 +108,21 @@ export default function SignupPage() {
             error={fieldErrors?.password?.[0]}
             required
           />
+          <SelectField
+            label="How will you use this workspace?"
+            value={workspaceIntent}
+            onChange={(e) => setWorkspaceIntent(e.target.value)}
+          >
+            <option value="admin">Project Admin</option>
+            <option value="member">Team Member</option>
+          </SelectField>
+          <p className="text-xs leading-relaxed text-slate-500">
+            You become a project admin when you create a project. Team roles are managed per
+            project.
+          </p>
           {error ? <p className="text-sm text-rose-400">{error}</p> : null}
           <Button type="submit" className="w-full" disabled={loading}>
-            {loading ? "Creating account…" : "Sign up"}
+            {loading ? "Creating account…" : "Create account"}
           </Button>
         </form>
         <p className="mt-6 text-center text-sm text-slate-400">
@@ -90,6 +132,6 @@ export default function SignupPage() {
           </Link>
         </p>
       </Card>
-    </div>
+    </AuthLayout>
   );
 }

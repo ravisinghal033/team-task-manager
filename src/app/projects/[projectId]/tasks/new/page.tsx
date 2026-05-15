@@ -3,21 +3,17 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
+import { AssigneeSelect } from "@/components/AssigneeSelect";
+import { LoadingScreen } from "@/components/LoadingScreen";
 import { Button, Input, TextArea, SelectField } from "@/components/FormControls";
 import { Card, CardDescription, CardTitle } from "@/components/Card";
-
-type Member = {
-  id: string;
-  role: string;
-  user: { id: string; name: string; email: string };
-};
+import { apiFetch } from "@/lib/client-fetch";
 
 export default function NewTaskPage() {
   const params = useParams();
   const router = useRouter();
   const projectId = params.projectId as string;
 
-  const [members, setMembers] = useState<Member[]>([]);
   const [myRole, setMyRole] = useState<string | null>(null);
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
@@ -26,23 +22,17 @@ export default function NewTaskPage() {
   const [due, setDue] = useState("");
   const [assigneeId, setAssigneeId] = useState("");
   const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
-    (async () => {
+    void (async () => {
       try {
-        const [mRes, pRes] = await Promise.all([
-          fetch(`/api/projects/${projectId}/members`, { credentials: "include" }),
-          fetch(`/api/projects/${projectId}`, { credentials: "include" }),
-        ]);
-        const mJson = (await mRes.json()) as { members?: Member[] };
-        const pJson = (await pRes.json()) as { myRole?: string; error?: string };
-        if (!cancelled) {
-          setMembers(mJson.members ?? []);
-          setMyRole(pJson.myRole ?? null);
-        }
+        const res = await apiFetch(`/api/projects/${projectId}`);
+        const json = (await res.json()) as { myRole?: string; error?: string };
+        if (!cancelled) setMyRole(json.myRole ?? null);
       } finally {
         if (!cancelled) setLoading(false);
       }
@@ -56,6 +46,7 @@ export default function NewTaskPage() {
     e.preventDefault();
     if (myRole !== "ADMIN") return;
     setError(null);
+    setSuccess(null);
     setSubmitting(true);
     try {
       const body: Record<string, unknown> = {
@@ -66,19 +57,27 @@ export default function NewTaskPage() {
         dueDate: due ? new Date(due).toISOString() : null,
         assigneeId: assigneeId === "" ? null : assigneeId,
       };
-      const res = await fetch(`/api/projects/${projectId}/tasks`, {
+      const res = await apiFetch(`/api/projects/${projectId}/tasks`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        credentials: "include",
         body: JSON.stringify(body),
       });
       const data = (await res.json()) as { error?: string; task?: { id: string } };
       if (!res.ok) {
         setError(data.error || "Could not create task");
-        setSubmitting(false);
         return;
       }
-      if (data.task) router.push(`/tasks/${data.task.id}`);
+      if (data.task) {
+        const assigned = Boolean(assigneeId);
+        if (assigned) {
+          setSuccess("Task assigned successfully.");
+          window.setTimeout(() => {
+            router.push(`/projects/${projectId}?assigned=1`);
+          }, 600);
+        } else {
+          router.push(`/tasks/${data.task.id}`);
+        }
+      }
     } catch {
       setError("Something went wrong");
     } finally {
@@ -87,11 +86,7 @@ export default function NewTaskPage() {
   }
 
   if (loading) {
-    return (
-      <div className="flex min-h-[30vh] items-center justify-center text-slate-400">
-        Loading…
-      </div>
-    );
+    return <LoadingScreen label="Loading task form…" />;
   }
 
   if (myRole !== "ADMIN") {
@@ -109,11 +104,12 @@ export default function NewTaskPage() {
     <div className="mx-auto max-w-xl space-y-8">
       <div>
         <h1 className="text-3xl font-bold tracking-tight text-white">New task</h1>
-        <p className="mt-1 text-slate-400">Assign work to teammates who are already on this project.</p>
+        <p className="mt-1 text-slate-400">Assign work to teammates on this project.</p>
       </div>
       <Card>
         <CardTitle>Task details</CardTitle>
         <CardDescription>Required fields are validated on the server.</CardDescription>
+        {success ? <p className="mt-3 text-sm text-emerald-400">{success}</p> : null}
         <form onSubmit={(e) => void onSubmit(e)} className="mt-6 space-y-4">
           <Input label="Title" value={title} onChange={(e) => setTitle(e.target.value)} required />
           <TextArea
@@ -144,18 +140,11 @@ export default function NewTaskPage() {
             value={due}
             onChange={(e) => setDue(e.target.value)}
           />
-          <SelectField
-            label="Assignee"
+          <AssigneeSelect
+            projectId={projectId}
             value={assigneeId}
-            onChange={(e) => setAssigneeId(e.target.value)}
-          >
-            <option value="">Unassigned</option>
-            {members.map((m) => (
-              <option key={m.id} value={m.user.id}>
-                {m.user.name}
-              </option>
-            ))}
-          </SelectField>
+            onChange={setAssigneeId}
+          />
           {error ? <p className="text-sm text-rose-400">{error}</p> : null}
           <div className="flex gap-3">
             <Button type="submit" disabled={submitting}>

@@ -1,9 +1,10 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { Button, Input, TextArea } from "@/components/FormControls";
+import { RoleBadge } from "@/components/Badges";
 import { Card, CardDescription, CardTitle } from "@/components/Card";
 
 type Member = {
@@ -34,7 +35,7 @@ export default function ProjectSettingsPage() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
 
-  async function load() {
+  const load = useCallback(async () => {
     setError(null);
     const res = await fetch(`/api/projects/${projectId}`, { credentials: "include" });
     const json = (await res.json()) as {
@@ -54,11 +55,11 @@ export default function ProjectSettingsPage() {
       setDescription(p.description ?? "");
     }
     setMyRole(json.myRole ?? null);
-  }
+  }, [projectId]);
 
   useEffect(() => {
     let cancelled = false;
-    (async () => {
+    void (async () => {
       setLoading(true);
       await load();
       if (!cancelled) setLoading(false);
@@ -66,7 +67,7 @@ export default function ProjectSettingsPage() {
     return () => {
       cancelled = true;
     };
-  }, [projectId]);
+  }, [load]);
 
   async function saveProject(e: React.FormEvent) {
     e.preventDefault();
@@ -174,7 +175,6 @@ export default function ProjectSettingsPage() {
       return;
     }
     router.push("/projects");
-    router.refresh();
   }
 
   if (loading) {
@@ -276,14 +276,18 @@ export default function ProjectSettingsPage() {
                     <div className="text-xs text-slate-500">{m.user.email}</div>
                   </td>
                   <td className="px-4 py-3">
-                    <select
-                      className="rounded-lg border border-slate-700 bg-slate-950 px-2 py-1 text-slate-100"
-                      value={m.role}
-                      onChange={(e) => void updateRole(m.id, e.target.value)}
-                    >
-                      <option value="ADMIN">ADMIN</option>
-                      <option value="MEMBER">MEMBER</option>
-                    </select>
+                    <div className="flex flex-wrap items-center gap-2">
+                      <RoleBadge role={m.role} />
+                      <select
+                        className="rounded-lg border border-slate-700 bg-slate-950 px-2 py-1 text-xs text-slate-100"
+                        value={m.role}
+                        onChange={(e) => void updateRole(m.id, e.target.value)}
+                        aria-label={`Change role for ${m.user.name}`}
+                      >
+                        <option value="ADMIN">ADMIN</option>
+                        <option value="MEMBER">MEMBER</option>
+                      </select>
+                    </div>
                   </td>
                   <td className="px-4 py-3">
                     <Button type="button" variant="ghost" onClick={() => void removeMember(m.id)}>

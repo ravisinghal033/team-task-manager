@@ -1,53 +1,91 @@
 "use client";
 
-import { Suspense, useState } from "react";
 import Link from "next/link";
-import { useRouter, useSearchParams } from "next/navigation";
-import { Button, Input } from "@/components/FormControls";
+import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+import { AuthLayout } from "@/components/AuthLayout";
 import { Card, CardDescription, CardTitle } from "@/components/Card";
+import { Button, Input } from "@/components/FormControls";
+import { apiFetch } from "@/lib/client-fetch";
 
-function LoginForm() {
+export default function LoginPage() {
   const router = useRouter();
-  const searchParams = useSearchParams();
-  const from = searchParams.get("from") || "/dashboard";
-
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [checkingAuth, setCheckingAuth] = useState(true);
 
-  async function onSubmit(e: React.FormEvent) {
+  useEffect(() => {
+    let cancelled = false;
+
+    async function checkAuth() {
+      try {
+        const res = await apiFetch("/api/auth/me");
+        if (!cancelled && res.ok) {
+          router.replace("/dashboard");
+          return;
+        }
+      } catch {
+        // Not logged in
+      } finally {
+        if (!cancelled) setCheckingAuth(false);
+      }
+    }
+
+    void checkAuth();
+    return () => {
+      cancelled = true;
+    };
+  }, [router]);
+
+  async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setError(null);
     setLoading(true);
+
     try {
-      const res = await fetch("/api/auth/login", {
+      const res = await apiFetch("/api/auth/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        credentials: "include",
         body: JSON.stringify({ email, password }),
       });
-      const data = (await res.json()) as { error?: string; details?: unknown };
+
+      const data = (await res.json()) as { error?: string };
+
       if (!res.ok) {
         setError(data.error || "Login failed");
-        setLoading(false);
         return;
       }
-      router.push(from.startsWith("/") ? from : "/dashboard");
-      router.refresh();
+
+      router.push("/dashboard");
     } catch {
-      setError("Something went wrong");
+      setError("Something went wrong. Please try again.");
     } finally {
       setLoading(false);
     }
   }
 
+  if (checkingAuth) {
+    return (
+      <AuthLayout>
+        <Card>
+          <CardTitle>Checking session…</CardTitle>
+          <CardDescription>Please wait.</CardDescription>
+        </Card>
+      </AuthLayout>
+    );
+  }
+
   return (
-    <div className="mx-auto flex min-h-[70vh] max-w-md flex-col justify-center">
+    <AuthLayout>
       <Card>
         <CardTitle>Welcome back</CardTitle>
-        <CardDescription>Sign in to manage projects and tasks.</CardDescription>
-        <form onSubmit={(e) => void onSubmit(e)} className="mt-6 space-y-4">
+        <CardDescription>
+          Sign in to your workspace or create a new account.
+        </CardDescription>
+
+        <form onSubmit={onSubmit} className="mt-6 space-y-4">
           <Input
             label="Email"
             type="email"
@@ -69,27 +107,14 @@ function LoginForm() {
             {loading ? "Signing in…" : "Sign in"}
           </Button>
         </form>
+
         <p className="mt-6 text-center text-sm text-slate-400">
-          No account?{" "}
+          New here?{" "}
           <Link href="/signup" className="font-medium text-sky-400 hover:text-sky-300">
-            Create one
+            Create an account
           </Link>
         </p>
       </Card>
-    </div>
-  );
-}
-
-export default function LoginPage() {
-  return (
-    <Suspense
-      fallback={
-        <div className="flex min-h-[40vh] items-center justify-center text-slate-400">
-          Loading…
-        </div>
-      }
-    >
-      <LoginForm />
-    </Suspense>
+    </AuthLayout>
   );
 }

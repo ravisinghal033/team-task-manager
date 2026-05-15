@@ -1,11 +1,16 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
-import { Button, Input, TextArea, SelectField } from "@/components/FormControls";
-import { Card, CardDescription, CardTitle } from "@/components/Card";
+import { AssigneeSelect } from "@/components/AssigneeSelect";
 import { StatusBadge, PriorityBadge, OverdueBadge } from "@/components/Badges";
+import { LoadingScreen } from "@/components/LoadingScreen";
+import { useSessionUser } from "@/components/UserProvider";
+import { apiFetch } from "@/lib/client-fetch";
+import { formatDueDate } from "@/lib/format-date";
+import { Card, CardDescription, CardTitle } from "@/components/Card";
+import { Button, Input, TextArea, SelectField } from "@/components/FormControls";
 
 type TaskPayload = {
   id: string;
@@ -16,8 +21,11 @@ type TaskPayload = {
   dueDate: string | null;
   projectId: string;
   assigneeId: string | null;
+  project: { id: string; name: string };
   assignee: { id: string; name: string; email: string } | null;
   createdBy: { id: string; name: string; email: string };
+  createdAt: string;
+  updatedAt: string;
   overdue?: boolean;
 };
 
@@ -28,10 +36,8 @@ export default function TaskDetailPage() {
 
   const [task, setTask] = useState<TaskPayload | null>(null);
   const [myRole, setMyRole] = useState<string | null>(null);
-  const [meId, setMeId] = useState<string | null>(null);
-  const [members, setMembers] = useState<Array<{ id: string; user: { id: string; name: string } }>>(
-    [],
-  );
+  const { user: sessionUser } = useSessionUser();
+  const meId = sessionUser?.id ?? null;
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -43,12 +49,9 @@ export default function TaskDetailPage() {
   const [due, setDue] = useState("");
   const [assigneeId, setAssigneeId] = useState("");
 
-  async function load() {
+  const load = useCallback(async () => {
     setError(null);
-    const [tRes, meRes] = await Promise.all([
-      fetch(`/api/tasks/${taskId}`, { credentials: "include" }),
-      fetch("/api/auth/me", { credentials: "include" }),
-    ]);
+    const tRes = await apiFetch(`/api/tasks/${taskId}`);
     const tJson = (await tRes.json()) as {
       error?: string;
       task?: TaskPayload;
@@ -79,25 +82,11 @@ export default function TaskDetailPage() {
       setAssigneeId(t.assigneeId ?? "");
     }
 
-    if (meRes.ok) {
-      const u = (await meRes.json()) as { user: { id: string } };
-      setMeId(u.user.id);
-    }
-
-    if (t) {
-      const mRes = await fetch(`/api/projects/${t.projectId}/members`, {
-        credentials: "include",
-      });
-      const mJson = (await mRes.json()) as {
-        members?: Array<{ id: string; user: { id: string; name: string } }>;
-      };
-      setMembers(mJson.members ?? []);
-    }
-  }
+  }, [taskId]);
 
   useEffect(() => {
     let cancelled = false;
-    (async () => {
+    void (async () => {
       setLoading(true);
       await load();
       if (!cancelled) setLoading(false);
@@ -105,7 +94,7 @@ export default function TaskDetailPage() {
     return () => {
       cancelled = true;
     };
-  }, [taskId]);
+  }, [load]);
 
   const isAdmin = myRole === "ADMIN";
   const isAssignee = task?.assigneeId != null && task.assigneeId === meId;
@@ -116,10 +105,9 @@ export default function TaskDetailPage() {
     setSaving(true);
     setError(null);
     try {
-      const res = await fetch(`/api/tasks/${taskId}`, {
+      const res = await apiFetch(`/api/tasks/${taskId}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        credentials: "include",
         body: JSON.stringify({
           title,
           description: description.trim() === "" ? null : description,
@@ -132,7 +120,6 @@ export default function TaskDetailPage() {
       const data = (await res.json()) as { error?: string };
       if (!res.ok) {
         setError(data.error || "Could not save");
-        setSaving(false);
         return;
       }
       await load();
@@ -148,16 +135,14 @@ export default function TaskDetailPage() {
     setSaving(true);
     setError(null);
     try {
-      const res = await fetch(`/api/tasks/${taskId}`, {
+      const res = await apiFetch(`/api/tasks/${taskId}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        credentials: "include",
         body: JSON.stringify({ status: next }),
       });
       const data = (await res.json()) as { error?: string };
       if (!res.ok) {
         setError(data.error || "Could not update status");
-        setSaving(false);
         return;
       }
       setStatus(next);
@@ -172,7 +157,7 @@ export default function TaskDetailPage() {
   async function deleteTask() {
     if (!isAdmin) return;
     if (!confirm("Delete this task permanently?")) return;
-    const res = await fetch(`/api/tasks/${taskId}`, { method: "DELETE", credentials: "include" });
+    const res = await apiFetch(`/api/tasks/${taskId}`, { method: "DELETE" });
     if (!res.ok) {
       const data = (await res.json()) as { error?: string };
       setError(data.error || "Could not delete");
@@ -182,11 +167,7 @@ export default function TaskDetailPage() {
   }
 
   if (loading) {
-    return (
-      <div className="flex min-h-[30vh] items-center justify-center text-slate-400">
-        Loading task…
-      </div>
-    );
+    return <LoadingScreen label="Loading task…" />;
   }
 
   if (error || !task) {
@@ -194,50 +175,80 @@ export default function TaskDetailPage() {
   }
 
   return (
-    <div className="mx-auto max-w-2xl space-y-8">
-      <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <Link
-            href={`/projects/${task.projectId}`}
-            className="text-sm text-sky-400 hover:text-sky-300"
-          >
-            ← Back to project
-          </Link>
-          <h1 className="mt-2 text-3xl font-bold tracking-tight text-white">{task.title}</h1>
-          <div className="mt-3 flex flex-wrap items-center gap-2">
-            <StatusBadge status={task.status} />
-            <PriorityBadge priority={task.priority} />
-            {task.overdue ? <OverdueBadge /> : null}
-          </div>
+    <div className="mx-auto max-w-2xl space-y-6">
+      <div>
+        <Link
+          href={`/projects/${task.projectId}`}
+          className="text-sm text-sky-400 hover:text-sky-300"
+        >
+          ← Back to project
+        </Link>
+        <h1 className="mt-2 text-3xl font-bold tracking-tight text-white">{task.title}</h1>
+        <div className="mt-3 flex flex-wrap gap-2">
+          <StatusBadge status={task.status} />
+          <PriorityBadge priority={task.priority} />
+          {task.overdue ? <OverdueBadge /> : null}
         </div>
       </div>
 
       <Card>
-        <CardTitle>Summary</CardTitle>
-        <CardDescription>Created by {task.createdBy.name}</CardDescription>
-        <dl className="mt-4 grid gap-3 text-sm sm:grid-cols-2">
+        <CardTitle>Details</CardTitle>
+        <dl className="mt-4 grid gap-4 text-sm sm:grid-cols-2">
           <div>
-            <dt className="text-slate-500">Assignee</dt>
-            <dd className="text-slate-200">{task.assignee?.name ?? "Unassigned"}</dd>
-          </div>
-          <div>
-            <dt className="text-slate-500">Due</dt>
-            <dd className="text-slate-200">
-              {task.dueDate ? new Date(task.dueDate).toLocaleString() : "None"}
+            <dt className="text-slate-500">Project</dt>
+            <dd className="mt-0.5">
+              <Link
+                href={`/projects/${task.projectId}`}
+                className="font-medium text-sky-400 hover:text-sky-300"
+              >
+                {task.project.name}
+              </Link>
             </dd>
           </div>
+          <div>
+            <dt className="text-slate-500">Assignee</dt>
+            <dd className="mt-0.5 text-slate-200">
+              {task.assignee ? `${task.assignee.name} — ${task.assignee.email}` : "Unassigned"}
+            </dd>
+          </div>
+          <div>
+            <dt className="text-slate-500">Created by</dt>
+            <dd className="mt-0.5 text-slate-200">{task.createdBy.name}</dd>
+          </div>
+          <div>
+            <dt className="text-slate-500">Due date</dt>
+            <dd className="mt-0.5 text-slate-200">
+              {formatDueDate(task.dueDate)}
+            </dd>
+          </div>
+          <div>
+            <dt className="text-slate-500">Created</dt>
+            <dd className="mt-0.5 text-slate-200">{new Date(task.createdAt).toLocaleString()}</dd>
+          </div>
+          <div>
+            <dt className="text-slate-500">Last updated</dt>
+            <dd className="mt-0.5 text-slate-200">{new Date(task.updatedAt).toLocaleString()}</dd>
+          </div>
         </dl>
-        {task.description ? (
-          <p className="mt-4 whitespace-pre-wrap text-slate-300">{task.description}</p>
-        ) : (
-          <p className="mt-4 text-sm text-slate-500">No description.</p>
-        )}
+        <div className="mt-6 border-t border-slate-800/80 pt-4">
+          <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+            Description
+          </p>
+          {task.description ? (
+            <p className="mt-2 whitespace-pre-wrap text-slate-300">{task.description}</p>
+          ) : (
+            <p className="mt-2 text-sm text-slate-500">No description provided.</p>
+          )}
+        </div>
       </Card>
 
       {isAssignee && !isAdmin ? (
         <Card>
-          <CardTitle>Your status</CardTitle>
-          <CardDescription>As the assignee, you may only move this task across statuses.</CardDescription>
+          <CardTitle>Update status</CardTitle>
+          <CardDescription>
+            As the assignee, you may only change status—not title, description, priority, due date,
+            or assignee.
+          </CardDescription>
           <div className="mt-4 flex flex-wrap gap-2">
             {(["TODO", "IN_PROGRESS", "DONE"] as const).map((s) => (
               <Button
@@ -258,7 +269,7 @@ export default function TaskDetailPage() {
       {isAdmin ? (
         <Card>
           <CardTitle>Edit task</CardTitle>
-          <CardDescription>Admins can change every field, including assignment.</CardDescription>
+          <CardDescription>Project admins can update every field.</CardDescription>
           <form onSubmit={(e) => void saveAdmin(e)} className="mt-6 space-y-4">
             <Input label="Title" value={title} onChange={(e) => setTitle(e.target.value)} required />
             <TextArea
@@ -289,18 +300,13 @@ export default function TaskDetailPage() {
               value={due}
               onChange={(e) => setDue(e.target.value)}
             />
-            <SelectField
-              label="Assignee"
-              value={assigneeId}
-              onChange={(e) => setAssigneeId(e.target.value)}
-            >
-              <option value="">Unassigned</option>
-              {members.map((m) => (
-                <option key={m.id} value={m.user.id}>
-                  {m.user.name}
-                </option>
-              ))}
-            </SelectField>
+            {task ? (
+              <AssigneeSelect
+                projectId={task.projectId}
+                value={assigneeId}
+                onChange={setAssigneeId}
+              />
+            ) : null}
             {error ? <p className="text-sm text-rose-400">{error}</p> : null}
             <div className="flex flex-wrap gap-3">
               <Button type="submit" disabled={saving}>
@@ -316,8 +322,8 @@ export default function TaskDetailPage() {
 
       {!isAdmin && !isAssignee ? (
         <p className="text-sm text-slate-500">
-          You can view this task because you are a project member. Only admins can edit fields, and
-          only the assignee can update status.
+          You can view this task as a project member. Only admins can edit fields; only the
+          assignee can update status.
         </p>
       ) : null}
     </div>

@@ -59,6 +59,7 @@ export async function GET(
         createdById: true,
         createdAt: true,
         updatedAt: true,
+        project: { select: { id: true, name: true } },
         assignee: { select: userSelect },
         createdBy: { select: userSelect },
       },
@@ -132,6 +133,7 @@ export async function PATCH(
           createdById: true,
           createdAt: true,
           updatedAt: true,
+          project: { select: { id: true, name: true } },
           assignee: { select: userSelect },
           createdBy: { select: userSelect },
         },
@@ -141,7 +143,7 @@ export async function PATCH(
       const overdue =
         !!task.dueDate && task.status !== "DONE" && task.dueDate < todayStart;
 
-      return jsonOk({ task: { ...task, overdue } });
+      return jsonOk({ task: { ...task, overdue }, myRole: access.role });
     }
 
     const adminAccess = await requireProjectAdmin(user.id, existing.projectId);
@@ -208,6 +210,7 @@ export async function PATCH(
         createdById: true,
         createdAt: true,
         updatedAt: true,
+        project: { select: { id: true, name: true } },
         assignee: { select: userSelect },
         createdBy: { select: userSelect },
       },
@@ -217,7 +220,7 @@ export async function PATCH(
     const overdue =
       !!task.dueDate && task.status !== "DONE" && task.dueDate < todayStart;
 
-    return jsonOk({ task: { ...task, overdue } });
+    return jsonOk({ task: { ...task, overdue }, myRole: adminAccess.role });
   } catch {
     return jsonError("Internal server error", 500);
   }

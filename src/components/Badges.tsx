@@ -37,3 +37,18 @@ export function OverdueBadge() {
     </span>
   );
 }
+
+const roleStyles: Record<string, string> = {
+  ADMIN: "bg-violet-500/15 text-violet-200 ring-1 ring-violet-500/40",
+  MEMBER: "bg-slate-700/80 text-slate-200 ring-1 ring-slate-600",
+};
+
+export function RoleBadge({ role }: { role: string }) {
+  return (
+    <span
+      className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold uppercase tracking-wide ${roleStyles[role] ?? "bg-slate-800 text-slate-300"}`}
+    >
+      {role}
+    </span>
+  );
+}

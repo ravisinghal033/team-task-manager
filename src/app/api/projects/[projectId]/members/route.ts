@@ -65,7 +65,7 @@ export async function POST(
       select: { id: true },
     });
     if (!invitee) {
-      return jsonError("No user found with that email", 404);
+      return jsonError("User not found. Ask them to sign up first.", 404);
     }
 
     const existing = await prisma.projectMember.findUnique({

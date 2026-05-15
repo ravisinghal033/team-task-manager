@@ -1,4 +1,3 @@
-// PostgreSQL datasource — set DATABASE_URL (e.g. Railway Postgres).
 generator client {
   provider = "prisma-client-js"
 }

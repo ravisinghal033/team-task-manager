@@ -178,6 +178,7 @@ export async function POST(
         updatedAt: true,
         assignee: { select: userSelect },
         createdBy: { select: userSelect },
+        project: { select: { id: true, name: true } },
       },
     });
 

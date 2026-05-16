@@ -20,6 +20,7 @@
   <img src="https://img.shields.io/badge/Prisma-ORM-2D3748?style=for-the-badge&logo=prisma" />
   <img src="https://img.shields.io/badge/Tailwind-CSS-38B2AC?style=for-the-badge&logo=tailwindcss" />
   <img src="https://img.shields.io/badge/Deployment-Railway-7B3FE4?style=for-the-badge&logo=railway" />
+  <img src="https://img.shields.io/badge/Docker-Optional-2496ED?style=for-the-badge&logo=docker&logoColor=white" />
 </p>
 
 ---
@@ -726,11 +727,4 @@ If you plan to open-source it publicly, add an appropriate license such as MIT.
 </p>
 ```
 
-After copying this into `README.md`, run:
 
-```powershell
-cd C:\Users\Hp\team-task-manager
-git add README.md
-git commit -m "Improve GitHub README"
-git push origin main
-```

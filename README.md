@@ -20,7 +20,7 @@
   <img src="https://img.shields.io/badge/Prisma-ORM-2D3748?style=for-the-badge&logo=prisma" />
   <img src="https://img.shields.io/badge/Tailwind-CSS-38B2AC?style=for-the-badge&logo=tailwindcss" />
   <img src="https://img.shields.io/badge/Deployment-Railway-7B3FE4?style=for-the-badge&logo=railway" />
-  <img src="https://img.shields.io/badge/Docker-Optional-2496ED?style=for-the-badge&logo=docker&logoColor=white" />
+  <img src="https://img.shields.io/badge/Containerization-2496ED?style=for-the-badge&logo=docker&logoColor=white" />
 </p>
 
 ---

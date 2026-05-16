@@ -1,534 +1,751 @@
-Ethara WorkBoard
-=================
+Copy-paste this into your GitHub `README.md`.
 
-Project, task, and team tracking for AI operations.
+````markdown
+# Ethara WorkBoard
 
-Ethara WorkBoard is a full-stack Team Task Manager built for the internal Full-Stack Developer assignment. It allows users to sign up, create projects, manage project members, assign tasks, track task progress, and enforce project-level Admin/Member access control.
+> Project, task, and team tracking for AI operations.
 
-Live Application URL: <PASTE_RAILWAY_LIVE_URL_HERE>
-GitHub Repository: <PASTE_GITHUB_REPOSITORY_URL_HERE>
+<p align="center">
+  <a href="https://team-task-manager-production-575e.up.railway.app">
+    <strong>🚀 Live Demo</strong>
+  </a>
+  ·
+  <a href="https://github.com/ravisinghal033/team-task-manager">
+    <strong>GitHub Repository</strong>
+  </a>
+</p>
 
-------------------------------------------------------------
-1. Assignment Alignment
-------------------------------------------------------------
+<p align="center">
+  <img src="https://img.shields.io/badge/Next.js-14.2.35-black?style=for-the-badge&logo=nextdotjs" />
+  <img src="https://img.shields.io/badge/TypeScript-Strict-blue?style=for-the-badge&logo=typescript" />
+  <img src="https://img.shields.io/badge/PostgreSQL-Railway-4169E1?style=for-the-badge&logo=postgresql" />
+  <img src="https://img.shields.io/badge/Prisma-ORM-2D3748?style=for-the-badge&logo=prisma" />
+  <img src="https://img.shields.io/badge/Tailwind-CSS-38B2AC?style=for-the-badge&logo=tailwindcss" />
+  <img src="https://img.shields.io/badge/Deployment-Railway-7B3FE4?style=for-the-badge&logo=railway" />
+</p>
 
-Required Feature                                    Status
---------------------------------------------------  --------
-Authentication: Signup/Login                        Completed
-Project creation and management                     Completed
-Team/member management                              Completed
-Task creation and assignment                        Completed
-Task status tracking                                Completed
-Dashboard with tasks/status/overdue tracking        Completed
-REST APIs                                           Completed
-Database with relationships                         Completed
-Validations                                         Completed
-Role-based access control: Admin/Member             Completed
-Railway deployment readiness                        Completed
-README and demo flow                                Completed
-Docker/contributor setup                            Included if Docker files are present
+---
 
-------------------------------------------------------------
-2. Project Summary
-------------------------------------------------------------
+## 📌 Overview
 
-Ethara WorkBoard is designed like a production-style internal workspace for AI operations teams. It supports company-style workflows where a project lead can create projects, add teammates, assign tasks, and monitor progress.
+**Ethara WorkBoard** is a full-stack team task management platform built for the internal Full-Stack Developer assessment.
 
-The app includes realistic demo projects such as:
+The app helps teams create projects, manage members, assign tasks, track project progress, monitor overdue work, and enforce project-level **Admin/Member role-based access control**.
 
-- Ethara AI - Kaijus
-- Ethara AI - Talos
-- Ethara AI - Vindex
+It is designed around realistic AI operations workflows, including demo projects such as:
 
-These demo projects show task workflows around AI evaluation, dataset preparation, prompt enhancement, trajectory work, and quality review.
+- **Ethara AI - Kaijus**
+- **Ethara AI - Talos**
+- **Ethara AI - Vindex**
+- **Ethara AI - Educational AI Validation System**
 
-------------------------------------------------------------
-3. Key Features
-------------------------------------------------------------
+These workflows demonstrate task tracking for AI evaluation, dataset preparation, prompt validation, trajectory review, and delivery management.
 
-Authentication and Security
+---
+
+## 🔗 Live Links
+
+| Resource | Link |
+|---|---|
+| Live Application | https://team-task-manager-production-575e.up.railway.app |
+| GitHub Repository | https://github.com/ravisinghal033/team-task-manager |
+
+---
+
+## ✅ Assignment Alignment
+
+| Requirement | Status |
+|---|---|
+| Authentication: Signup/Login | ✅ Completed |
+| Project creation and management | ✅ Completed |
+| Team/member management | ✅ Completed |
+| Task creation and assignment | ✅ Completed |
+| Task status tracking | ✅ Completed |
+| Dashboard with task, status, and overdue tracking | ✅ Completed |
+| REST APIs | ✅ Completed |
+| SQL database with relationships | ✅ Completed |
+| Validations | ✅ Completed |
+| Role-based access control: Admin/Member | ✅ Completed |
+| Railway deployment | ✅ Completed |
+| README and demo flow | ✅ Completed |
+
+---
+
+## ✨ Key Features
+
+### 🔐 Authentication and Security
 
 - Public signup for any unique email.
-- Secure login/logout.
-- Passwords are hashed using bcrypt.
-- Authentication uses JWT stored in secure HTTP-only cookies.
-- Protected routes for dashboard, projects, and task pages.
-- API responses never expose password hashes.
+- Secure login and logout.
+- Password hashing with **bcrypt**.
+- JWT authentication stored in **HTTP-only cookies**.
+- Protected routes for dashboard, projects, tasks, notifications, and profile.
+- API responses never expose `passwordHash`.
 
-Project Management
+### 📁 Project Management
 
-- Any signed-in user can create a project.
-- The project creator automatically becomes ADMIN for that project.
-- Project admins can update project details and manage project members.
-- Members can only access projects they belong to.
+- Any authenticated user can create a project.
+- Project creator automatically becomes **ADMIN** for that project.
+- Project admins can update project details.
+- Users can access only projects where they are members.
 
-Team Management
+### 👥 Team Management
 
 - Admins can add teammates by email.
 - Users must sign up before they can be added to a project.
-- Project roles are managed per project: ADMIN or MEMBER.
-- The app prevents removing or demoting the last ADMIN of a project.
+- Project roles are managed per project: **ADMIN** or **MEMBER**.
+- The app prevents removing or demoting the final project admin.
 
-Task Management
+### ✅ Task Management
 
 - Admins can create, edit, assign, and delete tasks.
 - Tasks include title, description, status, priority, due date/time, assignee, creator, and project.
 - Tasks can only be assigned to existing project members.
 - Members can update only the status of tasks assigned to them.
-- Members cannot edit title, description, priority, due date, assignee, project, or creator.
+- Members cannot edit restricted fields such as title, description, priority, due date, assignee, project, or creator.
 
-Dashboard
+### 📊 Role-Aware Dashboard
 
-- Role-aware dashboard for ADMIN and MEMBER users.
-- Admin-focused view shows project progress, created/assigned team work, overdue tasks, and workload summary.
-- Member-focused view shows assigned work, due soon tasks, overdue tasks, and completion progress.
-- Project progress is calculated from actual task status.
-- Tasks are sorted by urgency: overdue, high priority, due date, status, and recency.
-- Notifications page shows task-related alerts, due soon items, and overdue items.
+- Admin dashboard focuses on projects, created tasks, overdue work, and team workload.
+- Member dashboard focuses on assigned tasks, due soon tasks, overdue work, and completed tasks.
+- Project progress is calculated from real task status.
+- Tasks are sorted by urgency: overdue, priority, due date, status, and recency.
 
-User Experience
+### 🔔 Notifications and Profile
 
-- Polished SaaS-style UI with a professional dark-light theme.
-- App branding: Ethara WorkBoard.
-- Profile page with user details and project role context.
-- Full notifications page instead of a small notification card.
-- Loading states with branded workspace loader.
-- Clean empty states for projects, tasks, assigned tasks, and notifications.
+- Notifications page shows task-related alerts, due soon items, and overdue work.
+- Profile page displays user information and project role context.
+- Navbar includes active navigation, notification count, and profile access.
 
-------------------------------------------------------------
-4. Tech Stack
-------------------------------------------------------------
+### 🚀 Production Polish
 
-Frontend
+- Deployed live on Railway.
+- PostgreSQL database hosted on Railway.
+- Next.js upgraded to a secure patched version.
+- Optimized dashboard data loading.
+- Clean empty states and loading screens.
+- Professional dark SaaS-style interface.
 
-- Next.js 14 App Router
-- TypeScript
-- Tailwind CSS
-- React components and client-side form handling
+---
 
-Backend
+## 🧰 Tech Stack
 
-- Next.js REST API routes
-- Prisma ORM
-- PostgreSQL
-- Zod validation
-- bcrypt password hashing
-- jose JWT signing/verification
+| Layer | Technology |
+|---|---|
+| Frontend | Next.js 14 App Router, React, TypeScript |
+| Styling | Tailwind CSS |
+| Backend | Next.js REST API Routes |
+| Database | PostgreSQL |
+| ORM | Prisma |
+| Validation | Zod |
+| Authentication | JWT, HTTP-only cookies, bcrypt, jose |
+| Deployment | Railway |
+| Version Control | Git + GitHub |
 
-Deployment and DevOps
+---
 
-- Railway for deployment
-- Railway PostgreSQL
-- Docker support for repeatable local/contributor setup
-- GitHub for version control
+## 🖼️ Screenshots
 
-------------------------------------------------------------
-5. Database and Relationships
-------------------------------------------------------------
+> Recommended: create a `docs/images/` folder and add your screenshots there.
 
-Main entities:
+### Dashboard
 
-User
-- id
-- name
-- email
-- passwordHash
-- createdAt
-- updatedAt
+![Dashboard Screenshot](./docs/images/dashboard.png)
 
-Project
-- id
-- name
-- description
-- createdById
-- createdAt
-- updatedAt
+### Project Detail
 
-ProjectMember
-- id
-- projectId
-- userId
-- role: ADMIN or MEMBER
-- unique(projectId, userId)
+![Project Detail Screenshot](./docs/images/project-detail.png)
 
-Task
-- id
-- title
-- description
-- status: TODO, IN_PROGRESS, DONE
-- priority: LOW, MEDIUM, HIGH
-- dueDate
-- projectId
-- assigneeId
-- createdById
-- createdAt
-- updatedAt
+### Task Detail
 
-Relationship rules:
+![Task Detail Screenshot](./docs/images/task-detail.png)
 
-- A project can have many members.
-- A project can have many tasks.
-- A user can belong to many projects.
-- A task belongs to one project.
-- A task can be assigned only to a project member.
-- Project deletion cascades safely to related project members/tasks where configured.
+### Profile and Notifications
 
-------------------------------------------------------------
-6. Role-Based Access Control
-------------------------------------------------------------
+![Profile Screenshot](./docs/images/profile.png)
 
-ADMIN
+---
 
-A project ADMIN can:
+## 🏗️ System Architecture
 
-- Update project details.
-- Delete the project.
-- Add/remove project members.
-- Change member roles.
-- Create tasks.
-- Edit all task fields.
-- Delete tasks.
-- Assign tasks to project members.
-- View dashboard progress and workload for administered projects.
+```mermaid
+flowchart TB
+    User[User Browser] --> UI[Next.js App Router UI]
 
-MEMBER
+    UI --> AuthAPI[Auth API Routes]
+    UI --> ProjectAPI[Project API Routes]
+    UI --> TaskAPI[Task API Routes]
+    UI --> DashboardAPI[Dashboard API Route]
+    UI --> NotificationAPI[Notification API Route]
 
-A project MEMBER can:
+    AuthAPI --> AuthLogic[JWT + HTTP-only Cookie Auth]
+    ProjectAPI --> RBAC[Project-Level RBAC]
+    TaskAPI --> RBAC
+    DashboardAPI --> Aggregation[Dashboard Aggregation]
+    NotificationAPI --> Notifications[Task-Based Notifications]
 
-- View projects they belong to.
-- View tasks in those projects.
-- Update status only for tasks assigned to them.
+    AuthLogic --> Prisma[Prisma ORM]
+    RBAC --> Prisma
+    Aggregation --> Prisma
+    Notifications --> Prisma
 
-A project MEMBER cannot:
+    Prisma --> DB[(Railway PostgreSQL)]
 
-- Delete or edit a project.
-- Manage project members.
-- Create tasks unless promoted to ADMIN.
-- Edit task title, description, priority, due date, assignee, project, or creator.
-- Update tasks assigned to another user.
+    subgraph Railway Deployment
+      App[Railway App Service]
+      Database[Railway PostgreSQL Service]
+    end
 
-Safety rule:
+    App --> UI
+    Database --> DB
+````
 
-- The last ADMIN of a project cannot be removed or demoted.
+---
 
-------------------------------------------------------------
-7. API Overview
-------------------------------------------------------------
+## 🔄 User Workflow
 
-Auth
+```mermaid
+sequenceDiagram
+    actor Admin
+    actor Member
+    participant App as Ethara WorkBoard
+    participant API as REST API
+    participant DB as PostgreSQL
 
-POST /api/auth/signup
-POST /api/auth/login
-POST /api/auth/logout
-GET  /api/auth/me
+    Admin->>App: Signup/Login
+    App->>API: Authenticate user
+    API->>DB: Verify credentials
+    API-->>App: Set HTTP-only JWT cookie
 
-Dashboard
+    Admin->>App: Create project
+    App->>API: POST /api/projects
+    API->>DB: Create project + ADMIN membership
 
-GET /api/dashboard
+    Admin->>App: Add member by email
+    App->>API: POST /api/projects/:id/members
+    API->>DB: Add project member
 
-Notifications
+    Admin->>App: Create and assign task
+    App->>API: POST /api/projects/:id/tasks
+    API->>DB: Save task with assignee
 
-GET /api/notifications
+    Member->>App: View assigned work
+    App->>API: GET /api/dashboard
+    API->>DB: Fetch assigned tasks
+    API-->>App: Member dashboard
 
-Projects
+    Member->>App: Update task status
+    App->>API: PATCH /api/tasks/:taskId
+    API->>DB: Update status only
+```
 
-GET    /api/projects
-POST   /api/projects
-GET    /api/projects/:projectId
-PATCH  /api/projects/:projectId
-DELETE /api/projects/:projectId
+---
 
-Members
+## 🗄️ Database Model
 
-GET    /api/projects/:projectId/members
-POST   /api/projects/:projectId/members
-PATCH  /api/projects/:projectId/members/:memberId
-DELETE /api/projects/:projectId/members/:memberId
+```mermaid
+erDiagram
+    User ||--o{ ProjectMember : belongs_to
+    Project ||--o{ ProjectMember : has
+    Project ||--o{ Task : contains
+    User ||--o{ Task : creates
+    User ||--o{ Task : assigned_to
 
-Tasks
+    User {
+        string id
+        string name
+        string email
+        string passwordHash
+        datetime createdAt
+        datetime updatedAt
+    }
 
-GET    /api/projects/:projectId/tasks
-POST   /api/projects/:projectId/tasks
-GET    /api/tasks/:taskId
-PATCH  /api/tasks/:taskId
-DELETE /api/tasks/:taskId
+    Project {
+        string id
+        string name
+        string description
+        string createdById
+        datetime createdAt
+        datetime updatedAt
+    }
 
-------------------------------------------------------------
-8. Validation and Error Handling
-------------------------------------------------------------
+    ProjectMember {
+        string id
+        string projectId
+        string userId
+        enum role
+    }
 
-- Zod schemas validate all mutating API request bodies.
-- Unknown fields are rejected using strict schemas.
-- Invalid JSON returns a clean 400 response.
-- Unauthorized requests return 401.
-- Forbidden project/member actions return 403.
-- Missing resources return 404.
-- Invalid task assignment returns 400.
-- Dashboard shows a retry state if data cannot be loaded.
+    Task {
+        string id
+        string title
+        string description
+        enum status
+        enum priority
+        datetime dueDate
+        string projectId
+        string assigneeId
+        string createdById
+        datetime createdAt
+        datetime updatedAt
+    }
+```
 
-------------------------------------------------------------
-9. Performance and Reliability Improvements
-------------------------------------------------------------
+---
 
-The dashboard API was optimized to reduce database load.
+## 🛡️ Role-Based Access Control
 
-Improvements include:
+### ADMIN
 
-- Reduced repeated dashboard queries.
-- Avoided excessive Prisma count/groupBy calls.
-- Aggregated dashboard statistics from fewer database queries.
-- Added Prisma singleton usage for development.
-- Added lightweight notifications.
-- Added safer dashboard loading and retry state.
-- Added guidance for Railway PostgreSQL connection pool tuning.
+A project admin can:
 
-For local development with Railway PostgreSQL, a remote database can be slower than a local database. If connection pool timeout occurs, use a DATABASE_URL with connection tuning:
+* Update project details.
+* Delete the project.
+* Add or remove project members.
+* Change member roles.
+* Create tasks.
+* Edit all task fields.
+* Delete tasks.
+* Assign tasks to project members.
+* View project progress and team workload.
 
-connection_limit=3&pool_timeout=30&connect_timeout=10
+### MEMBER
 
-Do not commit real DATABASE_URL values.
+A project member can:
 
-------------------------------------------------------------
-10. Local Setup
-------------------------------------------------------------
+* View projects they belong to.
+* View project tasks.
+* Update the status of tasks assigned to them.
 
-1. Clone the repository:
+A project member cannot:
 
-git clone <PASTE_GITHUB_REPOSITORY_URL_HERE>
+* Delete or edit a project.
+* Manage project members.
+* Create project tasks unless promoted to admin.
+* Edit restricted task fields.
+* Update tasks assigned to another user.
+
+### Safety Rule
+
+The final admin of a project cannot be removed or demoted.
+
+---
+
+## 📡 API Routes
+
+### Authentication
+
+| Method | Route              | Description          |
+| ------ | ------------------ | -------------------- |
+| POST   | `/api/auth/signup` | Create a new account |
+| POST   | `/api/auth/login`  | Login user           |
+| POST   | `/api/auth/logout` | Clear auth cookie    |
+| GET    | `/api/auth/me`     | Get current user     |
+
+### Dashboard and Notifications
+
+| Method | Route                | Description               |
+| ------ | -------------------- | ------------------------- |
+| GET    | `/api/dashboard`     | Role-aware dashboard data |
+| GET    | `/api/notifications` | Task-based notifications  |
+
+### Projects
+
+| Method | Route                      | Description        |
+| ------ | -------------------------- | ------------------ |
+| GET    | `/api/projects`            | List user projects |
+| POST   | `/api/projects`            | Create project     |
+| GET    | `/api/projects/:projectId` | Get project detail |
+| PATCH  | `/api/projects/:projectId` | Update project     |
+| DELETE | `/api/projects/:projectId` | Delete project     |
+
+### Members
+
+| Method | Route                                        | Description          |
+| ------ | -------------------------------------------- | -------------------- |
+| GET    | `/api/projects/:projectId/members`           | List project members |
+| POST   | `/api/projects/:projectId/members`           | Add project member   |
+| PATCH  | `/api/projects/:projectId/members/:memberId` | Update member role   |
+| DELETE | `/api/projects/:projectId/members/:memberId` | Remove member        |
+
+### Tasks
+
+| Method | Route                            | Description        |
+| ------ | -------------------------------- | ------------------ |
+| GET    | `/api/projects/:projectId/tasks` | List project tasks |
+| POST   | `/api/projects/:projectId/tasks` | Create task        |
+| GET    | `/api/tasks/:taskId`             | Get task detail    |
+| PATCH  | `/api/tasks/:taskId`             | Update task        |
+| DELETE | `/api/tasks/:taskId`             | Delete task        |
+
+---
+
+## 📂 Folder Structure
+
+```bash
+team-task-manager/
+├── prisma/
+│   ├── migrations/
+│   ├── schema.prisma
+│   └── seed.ts
+│
+├── public/
+│   └── favicon.svg
+│
+├── src/
+│   ├── app/
+│   │   ├── api/
+│   │   │   ├── auth/
+│   │   │   ├── dashboard/
+│   │   │   ├── notifications/
+│   │   │   ├── projects/
+│   │   │   └── tasks/
+│   │   ├── dashboard/
+│   │   ├── login/
+│   │   ├── notifications/
+│   │   ├── profile/
+│   │   ├── projects/
+│   │   ├── signup/
+│   │   └── tasks/
+│   │
+│   ├── components/
+│   │   ├── AppShell.tsx
+│   │   ├── AssigneeSelect.tsx
+│   │   ├── AuthLayout.tsx
+│   │   ├── Badges.tsx
+│   │   ├── BrandMark.tsx
+│   │   ├── EmptyState.tsx
+│   │   ├── LoadingScreen.tsx
+│   │   └── NavbarMenus.tsx
+│   │
+│   └── lib/
+│       ├── auth.ts
+│       ├── auth-cookie.ts
+│       ├── client-fetch.ts
+│       ├── dashboard-aggregate.ts
+│       ├── format-date.ts
+│       ├── jwt.ts
+│       ├── password.ts
+│       ├── prisma.ts
+│       ├── project-access.ts
+│       ├── request-json.ts
+│       ├── task-sort.ts
+│       └── validation.ts
+│
+├── .env.example
+├── package.json
+├── package-lock.json
+├── tailwind.config.ts
+└── README.md
+```
+
+---
+
+## ⚙️ Getting Started
+
+### Prerequisites
+
+Make sure you have:
+
+* Node.js 18+
+* npm
+* PostgreSQL database
+* Git
+
+---
+
+## 🧑‍💻 Local Installation
+
+### 1. Clone the repository
+
+```bash
+git clone https://github.com/ravisinghal033/team-task-manager.git
 cd team-task-manager
+```
 
-2. Install dependencies:
+### 2. Install dependencies
 
+```bash
 npm install
+```
 
-3. Create environment file:
+### 3. Configure environment variables
 
+Create a local environment file:
+
+```bash
 copy .env.example .env
+```
 
-Set the following variables:
+For macOS/Linux:
 
+```bash
+cp .env.example .env
+```
+
+Add the required values:
+
+```env
 DATABASE_URL="postgresql://USER:PASSWORD@HOST:PORT/DATABASE"
 JWT_SECRET="your-long-secret-key"
 NEXT_PUBLIC_APP_URL="http://localhost:3000"
+```
 
-4. Generate Prisma client:
+### 4. Generate Prisma client
 
+```bash
 npm run prisma:generate
+```
 
-5. Apply migrations:
+### 5. Apply database migrations
 
+```bash
 npm run prisma:migrate
+```
 
-6. Seed demo data:
+### 6. Seed demo data
 
+```bash
 npm run prisma:seed
+```
 
-7. Run development server:
+### 7. Start development server
 
+```bash
 npm run dev
+```
 
 Open:
 
+```text
 http://localhost:3000
+```
 
-------------------------------------------------------------
-11. Docker Setup
-------------------------------------------------------------
+---
 
-Docker support is useful for contributors because it standardizes the development environment.
+## 🧾 Available Scripts
 
-Use this section only if Dockerfile/docker-compose.yml are included in the repository.
+| Script                    | Description                                     |
+| ------------------------- | ----------------------------------------------- |
+| `npm run dev`             | Start local development server                  |
+| `npm run build`           | Generate Prisma client and build production app |
+| `npm run start`           | Start production server                         |
+| `npm run lint`            | Run Next.js linting                             |
+| `npm run typecheck`       | Run TypeScript checks                           |
+| `npm run prisma:generate` | Generate Prisma client                          |
+| `npm run prisma:migrate`  | Apply Prisma migrations                         |
+| `npm run prisma:seed`     | Seed demo users, projects, and tasks            |
 
-Start the app with Docker Compose:
+---
 
-docker compose up --build
+## 🚀 Railway Deployment
 
-Stop containers:
+The app is deployed on **Railway** with Railway PostgreSQL.
 
-docker compose down
+### Railway Commands
 
-Reset containers and volumes:
+| Setting            | Command                     |
+| ------------------ | --------------------------- |
+| Build Command      | `npm run build`             |
+| Pre-deploy Command | `npx prisma migrate deploy` |
+| Start Command      | `npm run start`             |
 
-docker compose down -v
+### Railway Environment Variables
 
-Typical Docker services:
+```env
+DATABASE_URL=${{Postgres.DATABASE_URL}}
+JWT_SECRET=your-production-secret
+NEXT_PUBLIC_APP_URL=https://team-task-manager-production-575e.up.railway.app
+```
 
-- Next.js app
-- PostgreSQL database
+After deployment, seed demo data once:
 
-Make sure Docker environment variables match the app requirements:
-
-DATABASE_URL
-JWT_SECRET
-NEXT_PUBLIC_APP_URL
-
-If Docker files are not included in the repository, remove this section before submission or add Dockerfile and docker-compose.yml.
-
-------------------------------------------------------------
-12. Railway Deployment
-------------------------------------------------------------
-
-1. Push the repository to GitHub.
-2. Open Railway.
-3. Create a new project.
-4. Deploy from GitHub and select this repository.
-5. Add a PostgreSQL service.
-6. Set the app service environment variables:
-
-DATABASE_URL = Railway PostgreSQL DATABASE_URL
-JWT_SECRET = strong random secret
-NEXT_PUBLIC_APP_URL = Railway public app URL
-
-7. Set Railway commands:
-
-Build Command:
-npm run build
-
-Pre-deploy Command:
-npm run prisma:migrate
-
-Start Command:
-npm run start
-
-8. Generate a Railway domain.
-9. Optional: run seed after deployment:
-
+```bash
 npm run prisma:seed
+```
 
-------------------------------------------------------------
-13. Demo Credentials
-------------------------------------------------------------
+---
 
-Seeded demo accounts for assignment testing only. These are not real company passwords.
+## 👤 Demo Accounts
 
-Role                Email                         Password
-------------------  ----------------------------  ------------
-Bharat Lead/Admin   bharat.patidar@ethara.ai      Bharat@12345
-Ravi Member         ravi.singhal033@ethara.ai     Ravi@12345
-Admin Demo          admin@example.com             Admin@12345
-Member Demo         member@example.com            Member@12345
+Seeded demo accounts are included for assignment testing only.
 
-------------------------------------------------------------
-14. Suggested Demo Flow
-------------------------------------------------------------
+| Role              | Email                       | Password       |
+| ----------------- | --------------------------- | -------------- |
+| Bharat Lead/Admin | `bharat.patidar@ethara.ai`  | `Bharat@12345` |
+| Ravi Member       | `ravi.singhal033@ethara.ai` | `Ravi@12345`   |
+| Admin Demo        | `admin@example.com`         | `Admin@12345`  |
+| Member Demo       | `member@example.com`        | `Member@12345` |
 
-Admin Flow
+---
 
-1. Login as Bharat:
-   bharat.patidar@ethara.ai / Bharat@12345
+## 🎥 Demo Flow
 
-2. Open dashboard.
-3. Show project progress, overdue status, team workload, and notifications.
-4. Open Ethara AI - Kaijus, Ethara AI - Talos, or Ethara AI - Vindex.
-5. Add a member from project settings.
-6. Create a task and assign it to Ravi or another project member.
-7. Show that the assignee dropdown only lists project members.
-8. Edit task priority, due date, assignee, and status.
-9. Open profile and notifications pages.
+### Admin Flow
 
-Member Flow
+1. Login as Bharat.
+2. Open the dashboard.
+3. View project progress, team workload, overdue status, and notifications.
+4. Open a project.
+5. Add a project member from settings.
+6. Create a task and assign it to Ravi.
+7. Confirm the assignee dropdown only lists project members.
+8. Update task priority, due date, assignee, and status.
+9. Open notifications and profile pages.
 
-1. Login as Ravi:
-   ravi.singhal033@ethara.ai / Ravi@12345
+### Member Flow
 
-2. Open dashboard.
-3. Show assigned tasks, due soon tasks, overdue tasks, and completed count.
+1. Login as Ravi.
+2. Open the member dashboard.
+3. View assigned tasks, due soon tasks, overdue tasks, and completed count.
 4. Open an assigned task.
-5. Update task status only.
-6. Confirm member cannot edit title, description, priority, due date, assignee, or project.
+5. Update only the task status.
+6. Confirm member cannot edit restricted task fields.
 7. Confirm member cannot manage project settings.
 
-Public Signup Flow
+---
 
-1. Go to signup.
-2. Create a new account with any unique email.
-3. Create a new project.
-4. Confirm the creator becomes ADMIN for that project.
+## ✅ Testing Checklist
 
-------------------------------------------------------------
-15. Testing Checklist
-------------------------------------------------------------
+### Code Quality
 
-Build and Code Quality
+```bash
+npm run lint
+npm run typecheck
+npm run build
+npx prisma validate
+```
 
-- npm run lint
-- npm run typecheck
-- npm run build
-- npx prisma validate
-- npm run prisma:seed
+### Functional Checks
 
-Authentication
+* Signup works with a unique email.
+* Duplicate signup is rejected.
+* Login works with valid credentials.
+* Logout clears the session.
+* Dashboard loads after login.
+* Project creation works.
+* Project creator becomes admin.
+* Admin can add/remove members.
+* Admin can create/edit/delete tasks.
+* Admin cannot remove or demote the final admin.
+* Member can view assigned work.
+* Member can update only assigned task status.
+* Member cannot edit restricted task fields.
+* Assignee dropdown shows only project members.
+* Project progress updates when task status changes.
+* Notifications link to task details.
+* Profile page shows user details and role context.
 
-- Signup with valid email/password.
-- Signup rejects duplicate email.
-- Login works with valid credentials.
-- Login rejects wrong password.
-- Logout clears session.
-- Protected pages redirect when logged out.
+---
 
-RBAC
+## 🔒 Security Notes
 
-- Project creator becomes ADMIN.
-- Admin can add/remove members.
-- Admin can create/edit/delete tasks.
-- Admin cannot remove/demote last ADMIN.
-- Member can view assigned project/task data.
-- Member can update only assigned task status.
-- Member cannot manage members.
-- Member cannot delete project.
-- Member cannot edit restricted task fields.
+* Passwords are hashed with bcrypt.
+* Auth is handled with JWT stored in HTTP-only cookies.
+* Protected APIs validate authentication and project membership.
+* Members cannot access projects they do not belong to.
+* Members cannot modify restricted task fields.
+* `passwordHash` is never returned in API payloads.
+* `.env` must not be committed.
+* Database credentials must never be exposed publicly.
+* Demo credentials are for testing only.
 
-Task and Dashboard
+---
 
-- Task assignment dropdown shows only project members.
-- New member appears after being added to project.
-- Task status changes update project progress.
-- Overdue tasks are calculated from incomplete tasks only.
-- Due dates display in readable AM/PM format.
-- Notifications link to task details.
-- Profile page shows user and project role context.
+## ⚡ Performance Notes
 
-Deployment
+* Dashboard data is aggregated efficiently to avoid excessive database calls.
+* Prisma uses a singleton client in development.
+* Notifications are derived from existing task data.
+* Railway PostgreSQL is used for production deployment.
+* For remote Railway database usage during local development, optional connection tuning can be added to `DATABASE_URL`:
 
-- Railway build succeeds.
-- Railway migration runs through pre-deploy command.
-- Railway app opens with public URL.
-- Database connects successfully.
-- Seed data can be added if needed.
+```env
+connection_limit=3&pool_timeout=30&connect_timeout=10
+```
 
-------------------------------------------------------------
-16. Security Notes
-------------------------------------------------------------
+---
 
-- Do not commit .env.
-- Do not expose DATABASE_URL.
-- Do not expose passwordHash.
-- Rotate database credentials if they were shared accidentally.
-- Use a strong JWT_SECRET in production.
-- Demo credentials are only for assignment testing.
+## 🗺️ Roadmap
 
-------------------------------------------------------------
-17. Future Enhancements
-------------------------------------------------------------
+Potential future improvements:
 
-Given more time, the app can be extended with:
+* Email invitations.
+* Persistent read/unread notifications.
+* Task comments.
+* Activity logs.
+* File attachments.
+* Team analytics.
+* Audit trail for role changes.
+* Optional light/dark theme toggle.
+* Dockerized production setup.
+* CI/CD checks with GitHub Actions.
 
-- Email invitations.
-- Real persistent notification read/unread state.
-- Activity logs.
-- Task comments.
-- File attachments.
-- Team-level analytics.
-- Audit trail for role changes.
-- Optional light/dark theme switch.
+---
 
-------------------------------------------------------------
-18. Author / Submission
-------------------------------------------------------------
+## 🎨 Optional README Visual Prompts
 
-Built as a full-stack developer assessment project.
+### Hero Banner Prompt
 
-Candidate: Ravi Singhal
-Email: ravi.singhal033@ethara.ai
-Live URL: https://team-task-manager-production-575e.up.railway.app
-GitHub: https://github.com/ravisinghal033/team-task-manager
+```text
+Create a modern SaaS dashboard hero banner for a project management app named "Ethara WorkBoard". Show a dark navy interface with project cards, task progress bars, notification indicators, and team avatars. Style should be professional, clean, minimal, and suitable for a GitHub README. Use cyan and blue accents. No text except "Ethara WorkBoard".
+```
+
+### Architecture Illustration Prompt
+
+```text
+Create a clean full-stack architecture illustration for a Next.js project management app. Include browser UI, Next.js API routes, JWT authentication, Prisma ORM, PostgreSQL database, and Railway deployment. Use a modern flat technical diagram style with dark navy background and cyan highlights. Make it suitable for GitHub documentation.
+```
+
+---
+
+## 🤝 Contributing
+
+Contributions, suggestions, and improvements are welcome.
+
+To contribute:
+
+1. Fork the repository.
+2. Create a feature branch.
+3. Commit your changes.
+4. Open a pull request.
+
+```bash
+git checkout -b feature/your-feature-name
+git commit -m "Add your feature"
+git push origin feature/your-feature-name
+```
+
+---
+
+## 📄 License
+
+This project is available for educational and assessment purposes.
+
+If you plan to open-source it publicly, add an appropriate license such as MIT.
+
+---
+
+## 👨‍💻 Author
+
+**Ravi Singhal**
+
+* GitHub: [https://github.com/ravisinghal033](https://github.com/ravisinghal033)
+* Email: [ravi.singhal033@ethara.ai](mailto:ravi.singhal033@ethara.ai)
+* Live App: [https://team-task-manager-production-575e.up.railway.app](https://team-task-manager-production-575e.up.railway.app)
+
+---
+
+<p align="center">
+  Built with Next.js, Prisma, PostgreSQL, Tailwind CSS, and Railway.
+</p>
+```
+
+After copying this into `README.md`, run:
+
+```powershell
+cd C:\Users\Hp\team-task-manager
+git add README.md
+git commit -m "Improve GitHub README"
+git push origin main
+```

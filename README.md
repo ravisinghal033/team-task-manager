@@ -723,6 +723,5 @@ If you plan to open-source it publicly, add an appropriate license such as MIT.
 <p align="center">
   Built with Next.js, Prisma, PostgreSQL, Tailwind CSS, and Railway.
 </p>
-```
 
 

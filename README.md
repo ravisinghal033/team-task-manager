@@ -1,5 +1,4 @@
 
-````markdown
 # Ethara WorkBoard
 
 > Project, task, and team tracking for AI operations.

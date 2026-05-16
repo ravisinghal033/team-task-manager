@@ -148,20 +148,7 @@ These workflows demonstrate task tracking for AI evaluation, dataset preparation
 
 ### Dashboard
 
-![Dashboard Screenshot](./docs/images/dashboard.png)
-
-### Project Detail
-
-![Project Detail Screenshot](./docs/images/project-detail.png)
-
-### Task Detail
-
-![Task Detail Screenshot](./docs/images/task-detail.png)
-
-### Profile and Notifications
-
-![Profile Screenshot](./docs/images/profile.png)
-
+![Dashboard Screenshot](./public/dashboard-ss.png)
 ---
 
 ## 🏗️ System Architecture

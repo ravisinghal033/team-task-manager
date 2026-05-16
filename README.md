@@ -1,4 +1,3 @@
-Copy-paste this into your GitHub `README.md`.
 
 ````markdown
 # Ethara WorkBoard

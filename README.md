@@ -145,8 +145,6 @@ These workflows demonstrate task tracking for AI evaluation, dataset preparation
 
 ## 🖼️ Screenshots
 
-> Recommended: create a `docs/images/` folder and add your screenshots there.
-
 ### Dashboard
 
 ![Dashboard Screenshot](./public/dashboard-ss.png)
